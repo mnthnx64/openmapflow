@@ -21,6 +21,7 @@ from sklearn.metrics import (
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from tsai.models.TransformerModel import TransformerModel
+from tsai.models.gMLP import gMLP
 
 from openmapflow.config import PROJECT
 from openmapflow.constants import SUBSET
@@ -76,16 +77,16 @@ val_dataloader = DataLoader(val_data, batch_size=batch_size, shuffle=False)
 
 # ------------ Model -----------------------------------------
 num_timesteps, num_bands = train_data[0][0].shape
-
+print(num_bands)
 
 class Model(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.model = TransformerModel(c_in=num_bands, c_out=1)
+        self.model = gMLP(c_in=num_bands, c_out=1, seq_len = 12,d_model=64,  d_ffn=128)
 
     def forward(self, x):
         with torch.no_grad():
-            x = x * 1e-4  # TODO Fix
+            x = x * 1e-4
             x = x.transpose(2, 1)
         x = self.model(x).squeeze(dim=1)
         x = torch.sigmoid(x)
